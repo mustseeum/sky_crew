@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+        Theme applied to the Android Window while the process is starting when
+        the OS dark mode setting is off. This theme must not contain a
+        "starting" window background on Android 12+.
+    -->
+    <style name="LaunchTheme" parent="@android:style/Theme.Black.NoTitleBar">
+        <item name="android:windowBackground">@drawable/launch_background</item>
+    </style>
+    <!--
+        Theme applied to the Android Window as soon as the process has started.
+        Determines the colour of the Android Window while your Flutter UI
+        initialises, as well as providing the window background behind it.
+    -->
+    <style name="NormalTheme" parent="@android:style/Theme.Black.NoTitleBar">
+        <item name="android:windowBackground">?android:colorBackground</item>
+    </style>
+</resources>

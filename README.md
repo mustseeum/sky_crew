@@ -19,7 +19,7 @@ A scalable Flutter POC for managing pilots, co-pilots, flight attendants, and su
 | License & currency tracking with expiry alerts | ✅ |
 | Fatigue & wellness self-assessment | ✅ |
 | Fatigue trend chart (fl_chart) | ✅ |
-| Offline-first SQLite storage | ✅ |
+| Offline-first sembast storage (Android · iOS · Web) | ✅ |
 | Firebase Auth & Firestore ready | 🔜 (stub included) |
 | Dark mode | ✅ |
 
@@ -90,12 +90,27 @@ lib/
 
 ---
 
+## Platform Support
+
+| Platform | Output | Min version |
+|---|---|---|
+| **Android** | APK / AAB | Android 5.0 (API 21) |
+| **iOS** | IPA | iOS 12.0 |
+| **Web** | Static site | Chrome 89+ · Edge 89+ · Firefox 90+ · Safari 15+ |
+
+---
+
 ## Getting Started
 
 ### Prerequisites
-- Flutter 3.x (`flutter --version`)
-- Dart 3.x
-- Android Studio / Xcode for device emulation **or** any modern browser for Flutter Web
+
+| Requirement | Version | Notes |
+|---|---|---|
+| Flutter | 3.x | `flutter --version` |
+| Dart | 3.x | bundled with Flutter |
+| Android Studio + Android SDK | latest stable | for Android APK |
+| Xcode 15+ | latest stable | **macOS only** — for iOS IPA |
+| Chrome / Edge | any | for Flutter Web |
 
 ### Installation
 
@@ -104,35 +119,78 @@ lib/
 git clone https://github.com/mustseeum/sky_crew.git
 cd sky_crew
 
-# Install dependencies
+# Install Dart/Flutter dependencies
 flutter pub get
-
-# Run on connected device / emulator (mobile)
-flutter run
-
-# Run in your browser (Flutter Web)
-flutter run -d chrome
 ```
 
-### Running on Flutter Web
+---
+
+### 🤖 Android — build & run
+
+```bash
+# Run on a connected device or emulator
+flutter run -d <device-id>
+
+# Build a debug APK (for direct installation)
+flutter build apk --debug
+
+# Build a release APK (signed with debug key by default)
+flutter build apk --release
+# Output: build/app/outputs/flutter-apk/app-release.apk
+
+# Build an Android App Bundle (recommended for Play Store)
+flutter build appbundle --release
+# Output: build/app/outputs/bundle/release/app-release.aab
+```
+
+> **Note:** `android/app/build.gradle` sets `minSdkVersion flutter.minSdkVersion`
+> which resolves to **API 21** in Flutter 3.x (Android 5.0 Lollipop and later).
+
+---
+
+### 🍎 iOS — build & run (macOS + Xcode required)
+
+```bash
+# Install CocoaPods dependencies (first time only)
+cd ios && pod install && cd ..
+
+# Run on a connected iPhone / iPad (or Simulator)
+flutter run -d <device-id>
+
+# Build a release IPA for TestFlight / App Store
+flutter build ipa --release
+# Output: build/ios/ipa/SkyCrew.ipa
+
+# Open in Xcode to configure signing & capabilities
+open ios/Runner.xcworkspace
+```
+
+> **Bundle ID:** `com.skycrew.app` — change in Xcode under
+> *Runner → Signing & Capabilities* or in `ios/Runner.xcodeproj/project.pbxproj`.
+
+---
+
+### 🌐 Web — build & run
 
 SkyCrew fully supports Flutter Web — all data is persisted in the browser's
-**IndexedDB** via `sembast_web`.  PDF/CSV exports trigger a **browser download**
+**IndexedDB** via `sembast_web`. PDF/CSV exports trigger a **browser download**
 instead of saving to a local file path.
 
 ```bash
-# Development server
+# Development server (hot-reload)
 flutter run -d chrome
 
 # Production build (outputs to build/web/)
 flutter build web --release
 
-# Serve the production build locally
+# Serve the production build locally for testing
 cd build/web && python3 -m http.server 8080
 # then open http://localhost:8080
 ```
 
 > **Supported browsers:** Chrome 89+, Edge 89+, Firefox 90+, Safari 15+
+
+---
 
 ### Running Tests
 
