@@ -1,15 +1,44 @@
-import 'package:path/path.dart';
-import 'package:sqflite/sqflite.dart';
+import 'package:sembast/sembast.dart';
 
-/// Manages the SQLite database for offline-first data persistence.
+import 'db_factory.dart';
+
+/// Manages the sembast database for offline-first data persistence.
+/// Works on **all platforms** (iOS, Android, macOS, Windows, Linux, Web).
+///
+/// On native platforms the data is stored in a file in the app documents
+/// directory. On Flutter Web it is persisted in the browser's IndexedDB.
 class AppDatabase {
   static const String _databaseName = 'sky_crew.db';
   static const int _databaseVersion = 1;
 
   Database? _database;
 
+  // ---------------------------------------------------------------------------
+  // Stores (equivalent to SQL tables)
+  // ---------------------------------------------------------------------------
+
+  final StoreRef<String, Map<String, Object?>> usersStore =
+      stringMapStoreFactory.store('users');
+
+  final StoreRef<String, Map<String, Object?>> flightRecordsStore =
+      stringMapStoreFactory.store('flight_records');
+
+  final StoreRef<String, Map<String, Object?>> licensesStore =
+      stringMapStoreFactory.store('licenses');
+
+  final StoreRef<String, Map<String, Object?>> fatigueEntriesStore =
+      stringMapStoreFactory.store('fatigue_entries');
+
+  // ---------------------------------------------------------------------------
+  // Lifecycle
+  // ---------------------------------------------------------------------------
+
   Future<void> initialize() async {
-    _database = await _openDatabase();
+    final path = await getDatabasePath(_databaseName);
+    _database = await localDatabaseFactory.openDatabase(
+      path,
+      version: _databaseVersion,
+    );
   }
 
   Database get db {
@@ -19,107 +48,8 @@ class AppDatabase {
     return _database!;
   }
 
-  Future<Database> _openDatabase() async {
-    final dbPath = await getDatabasesPath();
-    final path = join(dbPath, _databaseName);
-
-    return openDatabase(
-      path,
-      version: _databaseVersion,
-      onCreate: _onCreate,
-      onUpgrade: _onUpgrade,
-    );
-  }
-
-  Future<void> _onCreate(Database db, int version) async {
-    await db.execute(_createUsersTable);
-    await db.execute(_createFlightRecordsTable);
-    await db.execute(_createLicensesTable);
-    await db.execute(_createFatigueEntriesTable);
-  }
-
-  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    // Implement migration logic here when schema changes
-  }
-
   Future<void> close() async {
     await _database?.close();
     _database = null;
   }
-
-  // ---------------------------------------------------------------------------
-  // Schema definitions
-  // ---------------------------------------------------------------------------
-
-  static const _createUsersTable = '''
-    CREATE TABLE IF NOT EXISTS users (
-      id TEXT PRIMARY KEY,
-      email TEXT NOT NULL UNIQUE,
-      name TEXT NOT NULL,
-      role TEXT NOT NULL,
-      password_hash TEXT NOT NULL,
-      employee_id TEXT,
-      airline TEXT,
-      base_airport TEXT,
-      created_at TEXT,
-      updated_at TEXT
-    )
-  ''';
-
-  static const _createFlightRecordsTable = '''
-    CREATE TABLE IF NOT EXISTS flight_records (
-      id TEXT PRIMARY KEY,
-      user_id TEXT NOT NULL,
-      date TEXT NOT NULL,
-      flight_number TEXT NOT NULL,
-      departure_airport TEXT NOT NULL,
-      arrival_airport TEXT NOT NULL,
-      aircraft_type TEXT NOT NULL,
-      aircraft_registration TEXT NOT NULL,
-      block_time_minutes INTEGER NOT NULL DEFAULT 0,
-      duty_time_minutes INTEGER NOT NULL DEFAULT 0,
-      role TEXT NOT NULL,
-      remarks TEXT,
-      is_off_duty INTEGER NOT NULL DEFAULT 0,
-      landings INTEGER NOT NULL DEFAULT 0,
-      night_time_minutes INTEGER NOT NULL DEFAULT 0,
-      instrument_time_minutes INTEGER NOT NULL DEFAULT 0,
-      created_at TEXT,
-      updated_at TEXT,
-      FOREIGN KEY (user_id) REFERENCES users (id)
-    )
-  ''';
-
-  static const _createLicensesTable = '''
-    CREATE TABLE IF NOT EXISTS licenses (
-      id TEXT PRIMARY KEY,
-      user_id TEXT NOT NULL,
-      type TEXT NOT NULL,
-      number TEXT NOT NULL,
-      issuing_authority TEXT NOT NULL,
-      issue_date TEXT NOT NULL,
-      expiry_date TEXT NOT NULL,
-      ratings TEXT,
-      remarks TEXT,
-      created_at TEXT,
-      updated_at TEXT,
-      FOREIGN KEY (user_id) REFERENCES users (id)
-    )
-  ''';
-
-  static const _createFatigueEntriesTable = '''
-    CREATE TABLE IF NOT EXISTS fatigue_entries (
-      id TEXT PRIMARY KEY,
-      user_id TEXT NOT NULL,
-      date TEXT NOT NULL,
-      fatigue_score INTEGER NOT NULL,
-      sleep_hours REAL NOT NULL,
-      timezone TEXT NOT NULL,
-      wellness_score INTEGER,
-      stress_level INTEGER,
-      notes TEXT,
-      created_at TEXT,
-      FOREIGN KEY (user_id) REFERENCES users (id)
-    )
-  ''';
 }

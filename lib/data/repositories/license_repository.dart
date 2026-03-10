@@ -1,7 +1,9 @@
+import 'package:sembast/sembast.dart';
+
 import '../../domain/entities/license.dart';
+import '../../utils/exceptions/app_exceptions.dart';
 import '../datasources/local/database/app_database.dart';
 import '../models/license_model.dart';
-import '../../utils/exceptions/app_exceptions.dart';
 
 /// Manages CRUD operations for licenses and certifications.
 class LicenseRepository {
@@ -10,51 +12,46 @@ class LicenseRepository {
 
   final AppDatabase _database;
 
+  StoreRef<String, Map<String, Object?>> get _store =>
+      _database.licensesStore;
+
+  Database get _db => _database.db;
+
   Future<List<License>> getLicenses(String userId) async {
-    final maps = await _database.db.query(
-      'licenses',
-      where: 'user_id = ?',
-      whereArgs: [userId],
-      orderBy: 'expiry_date ASC',
+    final records = await _store.find(
+      _db,
+      finder: Finder(
+        filter: Filter.equals('user_id', userId),
+        sortOrders: [SortOrder('expiry_date')],
+      ),
     );
-    return maps.map((m) => LicenseModel.fromMap(m).toEntity()).toList();
+    return records
+        .map((r) => LicenseModel.fromMap(r.value).toEntity())
+        .toList();
   }
 
   Future<License?> getLicense(String id) async {
-    final maps = await _database.db.query(
-      'licenses',
-      where: 'id = ?',
-      whereArgs: [id],
-      limit: 1,
-    );
-    if (maps.isEmpty) return null;
-    return LicenseModel.fromMap(maps.first).toEntity();
+    final record = await _store.record(id).get(_db);
+    if (record == null) return null;
+    return LicenseModel.fromMap(record).toEntity();
   }
 
   Future<License> addLicense(License license) async {
     final model = LicenseModel.fromEntity(license);
-    await _database.db.insert('licenses', model.toMap());
+    await _store.record(license.id).put(_db, model.toMap());
     return license;
   }
 
   Future<License> updateLicense(License license) async {
+    final existing = await _store.record(license.id).get(_db);
+    if (existing == null) throw AppException('License not found.');
     final updated = license.copyWith(updatedAt: DateTime.now());
     final model = LicenseModel.fromEntity(updated);
-    final count = await _database.db.update(
-      'licenses',
-      model.toMap(),
-      where: 'id = ?',
-      whereArgs: [license.id],
-    );
-    if (count == 0) throw AppException('License not found.');
+    await _store.record(updated.id).put(_db, model.toMap());
     return updated;
   }
 
   Future<void> deleteLicense(String id) async {
-    await _database.db.delete(
-      'licenses',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+    await _store.record(id).delete(_db);
   }
 }

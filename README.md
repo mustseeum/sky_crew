@@ -60,16 +60,15 @@ lib/
 
 ## Tech Stack
 
-| Layer | Library |
-|---|---|
-| State management | `get ^4.6.6` |
-| Local database | `sqflite ^2.3.2` |
-| PDF export | `pdf ^3.10.8` |
-| CSV export | `csv ^6.0.0` |
-| Charts | `fl_chart ^0.68.0` |
-| Typography | `google_fonts ^6.2.1` (Inter) |
-| Secure storage | `flutter_secure_storage ^9.2.2` |
-| UUID generation | `uuid ^4.4.0` |
+| Layer | Library | Web? |
+|---|---|---|
+| State management | `get ^4.6.6` | ✅ |
+| Local database | `sembast ^3.7.2` + `sembast_web ^2.4.0` | ✅ (IndexedDB) |
+| PDF export | `pdf ^3.10.8` | ✅ (browser download) |
+| CSV export | `csv ^6.0.0` | ✅ (browser download) |
+| Charts | `fl_chart ^0.68.0` | ✅ |
+| Typography | `google_fonts ^6.2.1` (Inter) | ✅ |
+| UUID generation | `uuid ^4.4.0` | ✅ |
 
 ---
 
@@ -96,7 +95,7 @@ lib/
 ### Prerequisites
 - Flutter 3.x (`flutter --version`)
 - Dart 3.x
-- Android Studio / Xcode for device emulation
+- Android Studio / Xcode for device emulation **or** any modern browser for Flutter Web
 
 ### Installation
 
@@ -108,9 +107,32 @@ cd sky_crew
 # Install dependencies
 flutter pub get
 
-# Run on connected device / emulator
+# Run on connected device / emulator (mobile)
 flutter run
+
+# Run in your browser (Flutter Web)
+flutter run -d chrome
 ```
+
+### Running on Flutter Web
+
+SkyCrew fully supports Flutter Web — all data is persisted in the browser's
+**IndexedDB** via `sembast_web`.  PDF/CSV exports trigger a **browser download**
+instead of saving to a local file path.
+
+```bash
+# Development server
+flutter run -d chrome
+
+# Production build (outputs to build/web/)
+flutter build web --release
+
+# Serve the production build locally
+cd build/web && python3 -m http.server 8080
+# then open http://localhost:8080
+```
+
+> **Supported browsers:** Chrome 89+, Edge 89+, Firefox 90+, Safari 15+
 
 ### Running Tests
 

@@ -1,4 +1,5 @@
 // Entry point for the SkyCrew Flutter application.
+// Supports: Android · iOS · macOS · Windows · Linux · **Flutter Web**
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -10,6 +11,7 @@ import 'presentation/theme/app_theme.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Initialize SharedPreferences (works on all platforms including web)
   await AppConfig.initialize();
 
   runApp(const SkyCrewApp());

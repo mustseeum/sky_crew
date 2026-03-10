@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -114,7 +115,10 @@ class LogbookView extends GetView<LogbookController> {
                 Get.back();
                 final path = await controller.exportToPDF();
                 if (path != null) {
-                  Get.snackbar('Exported', 'PDF saved to $path',
+                  final msg = kIsWeb
+                      ? 'PDF downloaded to your browser'
+                      : 'PDF saved to $path';
+                  Get.snackbar('Exported', msg,
                       snackPosition: SnackPosition.BOTTOM);
                 }
               },
@@ -126,7 +130,10 @@ class LogbookView extends GetView<LogbookController> {
                 Get.back();
                 final path = await controller.exportToCSV();
                 if (path != null) {
-                  Get.snackbar('Exported', 'CSV saved to $path',
+                  final msg = kIsWeb
+                      ? 'CSV downloaded to your browser'
+                      : 'CSV saved to $path';
+                  Get.snackbar('Exported', msg,
                       snackPosition: SnackPosition.BOTTOM);
                 }
               },

@@ -1,14 +1,16 @@
 import 'dart:convert';
+
 import 'package:crypto/crypto.dart';
+import 'package:sembast/sembast.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../config/app_config.dart';
 import '../../domain/entities/user.dart';
+import '../../utils/exceptions/app_exceptions.dart';
 import '../datasources/local/database/app_database.dart';
 import '../models/user_model.dart';
-import '../../config/app_config.dart';
-import '../../utils/exceptions/app_exceptions.dart';
 
-/// Handles user authentication using local SQLite storage.
+/// Handles user authentication using the sembast local database.
 class AuthRepository {
   AuthRepository({AppDatabase? database}) : _database = database;
 
@@ -19,7 +21,18 @@ class AuthRepository {
 
   User? get currentUser => _currentUser;
 
-  /// Registers a new user with hashed password.
+  StoreRef<String, Map<String, Object?>> get _store =>
+      _database!.usersStore;
+
+  Database get _db {
+    if (_database == null) throw AppException('Database not available');
+    return _database!.db;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Registration
+  // ---------------------------------------------------------------------------
+
   Future<User> register({
     required String email,
     required String password,
@@ -29,22 +42,18 @@ class AuthRepository {
     String? airline,
     String? baseAirport,
   }) async {
-    final db = _database?.db;
-    if (db == null) throw AppException('Database not available');
-
-    // Check for existing email
-    final existing = await db.query(
-      'users',
-      where: 'email = ?',
-      whereArgs: [email.toLowerCase()],
-      limit: 1,
+    // Check for duplicate email
+    final existing = await _store.findFirst(
+      _db,
+      finder: Finder(
+          filter: Filter.equals('email', email.toLowerCase())),
     );
-    if (existing.isNotEmpty) {
+    if (existing != null) {
       throw AppException('An account with this email already exists.');
     }
 
     final now = DateTime.now();
-    final userId = _generateId();
+    final userId = _uuid.v4();
     final passwordHash = _hashPassword(password);
 
     final user = User(
@@ -60,38 +69,34 @@ class AuthRepository {
     );
 
     final model = UserModel.fromEntity(user, passwordHash: passwordHash);
-    await db.insert('users', model.toMap());
+    await _store.record(userId).put(_db, model.toMap());
 
     await AppConfig.setLoggedIn(value: true);
     await AppConfig.setCurrentUserId(userId);
     _currentUser = user;
-
     return user;
   }
 
-  /// Authenticates a user with email and password.
+  // ---------------------------------------------------------------------------
+  // Login
+  // ---------------------------------------------------------------------------
+
   Future<User> login({
     required String email,
     required String password,
   }) async {
-    final db = _database?.db;
-    if (db == null) throw AppException('Database not available');
-
-    final results = await db.query(
-      'users',
-      where: 'email = ?',
-      whereArgs: [email.toLowerCase()],
-      limit: 1,
+    final record = await _store.findFirst(
+      _db,
+      finder: Finder(
+          filter: Filter.equals('email', email.toLowerCase())),
     );
 
-    if (results.isEmpty) {
+    if (record == null) {
       throw AppException('No account found with this email address.');
     }
 
-    final model = UserModel.fromMap(results.first);
-    final expectedHash = _hashPassword(password);
-
-    if (model.passwordHash != expectedHash) {
+    final model = UserModel.fromMap(record.value);
+    if (model.passwordHash != _hashPassword(password)) {
       throw AppException('Incorrect password. Please try again.');
     }
 
@@ -99,63 +104,43 @@ class AuthRepository {
     await AppConfig.setLoggedIn(value: true);
     await AppConfig.setCurrentUserId(user.id);
     _currentUser = user;
-
     return user;
   }
 
-  /// Loads the current user from the database by saved user ID.
+  // ---------------------------------------------------------------------------
+  // Session restore
+  // ---------------------------------------------------------------------------
+
   Future<User?> loadCurrentUser() async {
     final userId = AppConfig.currentUserId;
     if (userId == null) return null;
 
-    final db = _database?.db;
-    if (db == null) return null;
+    final record = await _store.record(userId).get(_db);
+    if (record == null) return null;
 
-    final results = await db.query(
-      'users',
-      where: 'id = ?',
-      whereArgs: [userId],
-      limit: 1,
-    );
-
-    if (results.isEmpty) return null;
-
-    final user = UserModel.fromMap(results.first).toEntity();
+    final user = UserModel.fromMap(record).toEntity();
     _currentUser = user;
     return user;
   }
 
-  /// Signs the current user out.
   Future<void> logout() async {
     _currentUser = null;
     await AppConfig.clearSession();
   }
 
-  /// Updates the current user's profile.
+  // ---------------------------------------------------------------------------
+  // Profile update
+  // ---------------------------------------------------------------------------
+
   Future<User> updateProfile(User user) async {
-    final db = _database?.db;
-    if (db == null) throw AppException('Database not available');
+    final existing = await _store.record(user.id).get(_db);
+    if (existing == null) throw AppException('User not found.');
 
+    final passwordHash = UserModel.fromMap(existing).passwordHash;
     final updated = user.copyWith(updatedAt: DateTime.now());
-    final existing = await db.query(
-      'users',
-      where: 'id = ?',
-      whereArgs: [user.id],
-      limit: 1,
-    );
-    if (existing.isEmpty) throw AppException('User not found.');
-
-    final passwordHash =
-        UserModel.fromMap(existing.first).passwordHash;
     final model = UserModel.fromEntity(updated, passwordHash: passwordHash);
 
-    await db.update(
-      'users',
-      model.toMap(),
-      where: 'id = ?',
-      whereArgs: [user.id],
-    );
-
+    await _store.record(updated.id).put(_db, model.toMap());
     _currentUser = updated;
     return updated;
   }
@@ -168,6 +153,4 @@ class AuthRepository {
     final bytes = utf8.encode(password);
     return sha256.convert(bytes).toString();
   }
-
-  String _generateId() => _uuid.v4();
 }
