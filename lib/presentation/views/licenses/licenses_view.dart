@@ -61,6 +61,7 @@ class LicensesView extends GetView<LicenseController> {
         );
       }),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'licenses_fab',
         onPressed: () => _showAddDialog(context),
         child: const Icon(Icons.add),
       ),

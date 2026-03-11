@@ -92,6 +92,7 @@ class LogbookView extends GetView<LogbookController> {
         );
       }),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'logbook_fab',
         onPressed: () {
           controller.clearSelectedRecord();
           Get.toNamed(AppRoutes.addFlight);

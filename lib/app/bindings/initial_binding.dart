@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:get/get.dart';
 
 import '../../data/datasources/local/database/app_database.dart';
@@ -12,12 +14,13 @@ import '../../presentation/controllers/navigation_controller.dart';
 class InitialBinding extends Bindings {
   @override
   void dependencies() {
-    // Database (async initialisation)
-    Get.putAsync<AppDatabase>(() async {
-      final db = AppDatabase();
-      await db.initialize();
-      return db;
-    }, permanent: true);
+    // Defensive fallback for cases where app hot-reload/restart state loses
+    // the pre-registered database instance from main().
+    if (!Get.isRegistered<AppDatabase>()) {
+      final database = AppDatabase();
+      Get.put<AppDatabase>(database, permanent: true);
+      unawaited(database.initialize());
+    }
 
     // Repositories
     Get.lazyPut<AuthRepository>(

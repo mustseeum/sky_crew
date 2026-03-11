@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'app/bindings/initial_binding.dart';
 import 'app/routes/app_pages.dart';
 import 'config/app_config.dart';
+import 'data/datasources/local/database/app_database.dart';
 import 'presentation/theme/app_theme.dart';
 
 Future<void> main() async {
@@ -13,6 +14,11 @@ Future<void> main() async {
 
   // Initialize SharedPreferences (works on all platforms including web)
   await AppConfig.initialize();
+
+  // Initialize and register database before bindings/controllers are resolved.
+  final database = AppDatabase();
+  await database.initialize();
+  Get.put<AppDatabase>(database, permanent: true);
 
   runApp(const SkyCrewApp());
 }
