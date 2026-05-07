@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../../app/routes/app_routes.dart';
-import '../../controllers/auth_controller.dart';
-import '../../controllers/license_controller.dart';
-import '../../controllers/logbook_controller.dart';
-import '../../controllers/navigation_controller.dart';
-import '../../theme/app_colors.dart';
-import '../../theme/app_text_styles.dart';
-import '../../widgets/common/app_card.dart';
-import '../../widgets/logbook/summary_card.dart';
-import '../fatigue/fatigue_tracking_view.dart';
-import '../licenses/licenses_view.dart';
-import '../logbook/logbook_view.dart';
-import '../profile/profile_view.dart';
+import 'package:sky_crew/app/routes/app_routes.dart';
+import 'package:sky_crew/presentation/controllers/auth_controller.dart';
+import 'package:sky_crew/presentation/controllers/license_controller.dart';
+import 'package:sky_crew/presentation/controllers/logbook_controller.dart';
+import 'package:sky_crew/presentation/controllers/navigation_controller.dart';
+import 'package:sky_crew/presentation/theme/app_colors.dart';
+import 'package:sky_crew/presentation/theme/app_text_styles.dart';
+import 'package:sky_crew/presentation/widgets/common/app_card.dart';
+import 'package:sky_crew/presentation/widgets/logbook/summary_card.dart';
+import 'package:sky_crew/presentation/views/fatigue/fatigue_tracking_view.dart';
+import 'package:sky_crew/presentation/views/licenses/licenses_view.dart';
+import 'package:sky_crew/presentation/views/logbook/logbook_view.dart';
+import 'package:sky_crew/presentation/views/profile/profile_view.dart';
 
 /// Home/dashboard screen with role-specific quick stats and bottom navigation.
 class HomeView extends StatelessWidget {

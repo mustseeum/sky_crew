@@ -1,5 +1,5 @@
-import '../../entities/user.dart';
-import '../../../data/repositories/auth_repository.dart';
+import 'package:sky_crew/domain/entities/user.dart';
+import 'package:sky_crew/data/repositories/auth_repository.dart';
 
 class RegisterUseCase {
   const RegisterUseCase(this._repository);

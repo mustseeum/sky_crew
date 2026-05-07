@@ -1,5 +1,5 @@
-import '../../entities/license.dart';
-import '../../../data/repositories/license_repository.dart';
+import 'package:sky_crew/domain/entities/license.dart';
+import 'package:sky_crew/data/repositories/license_repository.dart';
 
 class AddLicenseUseCase {
   const AddLicenseUseCase(this._repository);

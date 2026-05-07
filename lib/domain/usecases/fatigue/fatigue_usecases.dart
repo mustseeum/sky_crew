@@ -1,5 +1,5 @@
-import '../../entities/fatigue_entry.dart';
-import '../../../data/repositories/fatigue_repository.dart';
+import 'package:sky_crew/domain/entities/fatigue_entry.dart';
+import 'package:sky_crew/data/repositories/fatigue_repository.dart';
 
 class AddFatigueEntryUseCase {
   const AddFatigueEntryUseCase(this._repository);

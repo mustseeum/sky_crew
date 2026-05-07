@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../../domain/entities/user.dart';
-import '../../controllers/auth_controller.dart';
-import '../../theme/app_colors.dart';
-import '../../theme/app_text_styles.dart';
-import '../../widgets/common/app_button.dart';
-import '../../widgets/common/app_text_field.dart';
+import 'package:sky_crew/domain/entities/user.dart';
+import 'package:sky_crew/presentation/controllers/auth_controller.dart';
+import 'package:sky_crew/presentation/theme/app_colors.dart';
+import 'package:sky_crew/presentation/theme/app_text_styles.dart';
+import 'package:sky_crew/presentation/widgets/common/app_button.dart';
+import 'package:sky_crew/presentation/widgets/common/app_text_field.dart';
 
 /// Registration screen.
 class RegisterView extends GetView<AuthController> {

@@ -2,13 +2,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../../app/routes/app_routes.dart';
-import '../../controllers/logbook_controller.dart';
-import '../../theme/app_colors.dart';
-import '../../theme/app_text_styles.dart';
-import '../../widgets/common/custom_appbar.dart';
-import '../../widgets/logbook/flight_record_card.dart';
-import '../../widgets/logbook/summary_card.dart';
+import 'package:sky_crew/app/routes/app_routes.dart';
+import 'package:sky_crew/presentation/controllers/logbook_controller.dart';
+import 'package:sky_crew/presentation/theme/app_colors.dart';
+import 'package:sky_crew/presentation/theme/app_text_styles.dart';
+import 'package:sky_crew/presentation/widgets/common/custom_appbar.dart';
+import 'package:sky_crew/presentation/widgets/logbook/flight_record_card.dart';
+import 'package:sky_crew/presentation/widgets/logbook/summary_card.dart';
 
 /// Logbook list screen.
 class LogbookView extends GetView<LogbookController> {

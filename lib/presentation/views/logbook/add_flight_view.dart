@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../../utils/constants/app_constants.dart';
-import '../../../utils/helpers/date_time_helper.dart';
-import '../../controllers/logbook_controller.dart';
-import '../../theme/app_colors.dart';
-import '../../theme/app_text_styles.dart';
-import '../../widgets/common/app_button.dart';
-import '../../widgets/common/app_text_field.dart';
-import '../../widgets/common/custom_appbar.dart';
+import 'package:sky_crew/utils/constants/app_constants.dart';
+import 'package:sky_crew/utils/helpers/date_time_helper.dart';
+import 'package:sky_crew/presentation/controllers/logbook_controller.dart';
+import 'package:sky_crew/presentation/theme/app_colors.dart';
+import 'package:sky_crew/presentation/theme/app_text_styles.dart';
+import 'package:sky_crew/presentation/widgets/common/app_button.dart';
+import 'package:sky_crew/presentation/widgets/common/app_text_field.dart';
+import 'package:sky_crew/presentation/widgets/common/custom_appbar.dart';
 
 /// Add / Edit flight record form.
 class AddFlightView extends GetView<LogbookController> {

@@ -1,5 +1,5 @@
-import '../../entities/flight_record.dart';
-import '../../../data/repositories/logbook_repository.dart';
+import 'package:sky_crew/domain/entities/flight_record.dart';
+import 'package:sky_crew/data/repositories/logbook_repository.dart';
 
 class AddFlightRecordUseCase {
   const AddFlightRecordUseCase(this._repository);

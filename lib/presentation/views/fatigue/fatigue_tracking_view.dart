@@ -2,13 +2,13 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../../utils/helpers/date_time_helper.dart';
-import '../../controllers/fatigue_controller.dart';
-import '../../theme/app_colors.dart';
-import '../../theme/app_text_styles.dart';
-import '../../widgets/common/app_button.dart';
-import '../../widgets/common/app_card.dart';
-import '../../widgets/common/custom_appbar.dart';
+import 'package:sky_crew/utils/helpers/date_time_helper.dart';
+import 'package:sky_crew/presentation/controllers/fatigue_controller.dart';
+import 'package:sky_crew/presentation/theme/app_colors.dart';
+import 'package:sky_crew/presentation/theme/app_text_styles.dart';
+import 'package:sky_crew/presentation/widgets/common/app_button.dart';
+import 'package:sky_crew/presentation/widgets/common/app_card.dart';
+import 'package:sky_crew/presentation/widgets/common/custom_appbar.dart';
 
 /// Fatigue & wellness tracking screen.
 class FatigueTrackingView extends GetView<FatigueController> {

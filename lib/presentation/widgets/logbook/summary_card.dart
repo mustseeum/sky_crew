@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../../theme/app_colors.dart';
-import '../../theme/app_text_styles.dart';
-import '../../../utils/helpers/calculation_engine.dart';
-import '../../../utils/helpers/date_time_helper.dart';
+import 'package:sky_crew/presentation/theme/app_colors.dart';
+import 'package:sky_crew/presentation/theme/app_text_styles.dart';
+import 'package:sky_crew/utils/helpers/calculation_engine.dart';
+import 'package:sky_crew/utils/helpers/date_time_helper.dart';
 
 /// Displays aggregated logbook totals.
 class SummaryCard extends StatelessWidget {
