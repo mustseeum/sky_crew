@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import 'package:sky_crew/app/routes/app_routes.dart';
 import 'package:sky_crew/presentation/controllers/auth_controller.dart';
 import 'package:sky_crew/presentation/theme/app_colors.dart';
 import 'package:sky_crew/presentation/theme/app_text_styles.dart';
 import 'package:sky_crew/presentation/widgets/common/app_button.dart';
 import 'package:sky_crew/presentation/widgets/common/app_card.dart';
 import 'package:sky_crew/presentation/widgets/common/custom_appbar.dart';
+import 'package:sky_crew/presentation/widgets/common/responsive_content.dart';
 
 /// User profile screen.
 class ProfileView extends GetView<AuthController> {
@@ -33,127 +33,61 @@ class ProfileView extends GetView<AuthController> {
           return const Center(child: CircularProgressIndicator());
         }
 
-        return SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Avatar + name
-              Center(
-                child: Column(
-                  children: [
-                    CircleAvatar(
-                      radius: 42,
-                      backgroundColor: AppColors.primary,
-                      child: Text(
-                        _initials(user.name),
-                        style: AppTextStyles.headlineLarge.copyWith(
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Text(user.name, style: AppTextStyles.headlineMedium),
-                    Text(user.email,
-                        style: AppTextStyles.bodyMedium
-                            .copyWith(color: AppColors.textSecondary)),
-                    const SizedBox(height: 6),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary.withAlpha(30),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        user.role.displayName,
-                        style: AppTextStyles.labelMedium
-                            .copyWith(color: AppColors.primary),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            final useWideLayout = constraints.maxWidth >= 960;
 
-              AppSectionCard(
-                title: 'Account Details',
-                child: Column(
-                  children: [
-                    _ProfileRow(
-                      icon: Icons.badge_outlined,
-                      label: 'Employee ID',
-                      value: user.employeeId ?? '—',
-                    ),
-                    _ProfileRow(
-                      icon: Icons.business_outlined,
-                      label: 'Airline',
-                      value: user.airline ?? '—',
-                    ),
-                    _ProfileRow(
-                      icon: Icons.location_on_outlined,
-                      label: 'Base Airport',
-                      value: user.baseAirport ?? '—',
-                    ),
-                  ],
-                ),
+            return SingleChildScrollView(
+              child: ResponsiveContent(
+                maxWidth: 1200,
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
+                child: useWideLayout
+                    ? Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            flex: 4,
+                            child: _ProfileSummaryCard(user: user),
+                          ),
+                          const SizedBox(width: 20),
+                          Expanded(
+                            flex: 5,
+                            child: Column(
+                              children: [
+                                _AccountDetailsCard(user: user),
+                                const SizedBox(height: 16),
+                                _SettingsCard(onShowAbout: () => _showAbout(context)),
+                                const SizedBox(height: 24),
+                                AppDangerButton(
+                                  label: 'Sign Out',
+                                  onPressed: () => _confirmLogout(context),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      )
+                    : Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _ProfileSummaryCard(user: user),
+                          const SizedBox(height: 24),
+                          _AccountDetailsCard(user: user),
+                          const SizedBox(height: 16),
+                          _SettingsCard(onShowAbout: () => _showAbout(context)),
+                          const SizedBox(height: 24),
+                          AppDangerButton(
+                            label: 'Sign Out',
+                            onPressed: () => _confirmLogout(context),
+                          ),
+                        ],
+                      ),
               ),
-              const SizedBox(height: 16),
-
-              AppSectionCard(
-                title: 'App Settings',
-                child: Column(
-                  children: [
-                    ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      leading: const Icon(Icons.palette_outlined,
-                          color: AppColors.textSecondary),
-                      title: const Text('Theme'),
-                      trailing: const Icon(Icons.chevron_right,
-                          color: AppColors.textHint),
-                      onTap: () {},
-                    ),
-                    ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      leading: const Icon(Icons.notifications_outlined,
-                          color: AppColors.textSecondary),
-                      title: const Text('Notifications'),
-                      trailing: const Icon(Icons.chevron_right,
-                          color: AppColors.textHint),
-                      onTap: () {},
-                    ),
-                    ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      leading: const Icon(Icons.info_outline,
-                          color: AppColors.textSecondary),
-                      title: const Text('About SkyCrew'),
-                      trailing: const Icon(Icons.chevron_right,
-                          color: AppColors.textHint),
-                      onTap: () => _showAbout(context),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
-
-              AppDangerButton(
-                label: 'Sign Out',
-                onPressed: () => _confirmLogout(context),
-              ),
-              const SizedBox(height: 32),
-            ],
-          ),
+            );
+          },
         );
       }),
     );
-  }
-
-  String _initials(String name) {
-    final parts = name.trim().split(' ');
-    if (parts.length >= 2) {
-      return '${parts.first[0]}${parts.last[0]}'.toUpperCase();
-    }
-    return name.isNotEmpty ? name[0].toUpperCase() : 'SC';
   }
 
   void _confirmLogout(BuildContext context) {
@@ -195,6 +129,136 @@ class ProfileView extends GetView<AuthController> {
           'co-pilots, flight attendants, and supervisors.',
         ),
       ],
+    );
+  }
+}
+
+String _profileInitials(String name) {
+  final parts = name.trim().split(' ');
+  if (parts.length >= 2) {
+    return '${parts.first[0]}${parts.last[0]}'.toUpperCase();
+  }
+  return name.isNotEmpty ? name[0].toUpperCase() : 'SC';
+}
+
+class _ProfileSummaryCard extends StatelessWidget {
+  const _ProfileSummaryCard({required this.user});
+
+  final dynamic user;
+
+  @override
+  Widget build(BuildContext context) {
+    return AppCard(
+      child: Column(
+        children: [
+          CircleAvatar(
+            radius: 42,
+            backgroundColor: AppColors.primary,
+            child: Text(
+              _profileInitials(user.name),
+              style: AppTextStyles.headlineLarge.copyWith(
+                color: Colors.white,
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(user.name, style: AppTextStyles.headlineMedium),
+          Text(
+            user.email,
+            style: AppTextStyles.bodyMedium
+                .copyWith(color: AppColors.textSecondary),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 6),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withAlpha(30),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              user.role.displayName,
+              style: AppTextStyles.labelMedium.copyWith(color: AppColors.primary),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AccountDetailsCard extends StatelessWidget {
+  const _AccountDetailsCard({required this.user});
+
+  final dynamic user;
+
+  @override
+  Widget build(BuildContext context) {
+    return AppSectionCard(
+      title: 'Account Details',
+      child: Column(
+        children: [
+          _ProfileRow(
+            icon: Icons.badge_outlined,
+            label: 'Employee ID',
+            value: user.employeeId ?? '—',
+          ),
+          _ProfileRow(
+            icon: Icons.business_outlined,
+            label: 'Airline',
+            value: user.airline ?? '—',
+          ),
+          _ProfileRow(
+            icon: Icons.location_on_outlined,
+            label: 'Base Airport',
+            value: user.baseAirport ?? '—',
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SettingsCard extends StatelessWidget {
+  const _SettingsCard({required this.onShowAbout});
+
+  final VoidCallback onShowAbout;
+
+  @override
+  Widget build(BuildContext context) {
+    return AppSectionCard(
+      title: 'App Settings',
+      child: Column(
+        children: [
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: const Icon(Icons.palette_outlined,
+                color: AppColors.textSecondary),
+            title: const Text('Theme'),
+            trailing: const Icon(Icons.chevron_right,
+                color: AppColors.textHint),
+            onTap: () {},
+          ),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: const Icon(Icons.notifications_outlined,
+                color: AppColors.textSecondary),
+            title: const Text('Notifications'),
+            trailing: const Icon(Icons.chevron_right,
+                color: AppColors.textHint),
+            onTap: () {},
+          ),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: const Icon(Icons.info_outline,
+                color: AppColors.textSecondary),
+            title: const Text('About SkyCrew'),
+            trailing: const Icon(Icons.chevron_right,
+                color: AppColors.textHint),
+            onTap: onShowAbout,
+          ),
+        ],
+      ),
     );
   }
 }

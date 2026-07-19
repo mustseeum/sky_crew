@@ -7,6 +7,7 @@ import 'package:sky_crew/presentation/controllers/logbook_controller.dart';
 import 'package:sky_crew/presentation/theme/app_colors.dart';
 import 'package:sky_crew/presentation/theme/app_text_styles.dart';
 import 'package:sky_crew/presentation/widgets/common/custom_appbar.dart';
+import 'package:sky_crew/presentation/widgets/common/responsive_content.dart';
 import 'package:sky_crew/presentation/widgets/logbook/flight_record_card.dart';
 import 'package:sky_crew/presentation/widgets/logbook/summary_card.dart';
 
@@ -55,40 +56,53 @@ class LogbookView extends GetView<LogbookController> {
           );
         }
 
-        return CustomScrollView(
-          slivers: [
-            SliverPadding(
-              padding: const EdgeInsets.all(16),
-              sliver: SliverList(
-                delegate: SliverChildListDelegate([
-                  if (controller.summary.value != null)
-                    SummaryCard(summary: controller.summary.value!),
-                  const SizedBox(height: 20),
-                  Text('Flight Records',
-                      style: AppTextStyles.headlineSmall),
-                  const SizedBox(height: 12),
-                ]),
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            final useTwoColumns = constraints.maxWidth >= 1080;
+
+            return SingleChildScrollView(
+              padding: EdgeInsets.zero,
+              child: ResponsiveContent(
+                maxWidth: 1280,
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
+                child: useTwoColumns
+                    ? Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (controller.summary.value != null)
+                            Flexible(
+                              flex: 4,
+                              child: SummaryCard(
+                                summary: controller.summary.value!,
+                              ),
+                            ),
+                          if (controller.summary.value != null)
+                            const SizedBox(width: 20),
+                          Expanded(
+                            flex: 7,
+                            child: _RecordsSection(
+                              records: controller.records,
+                              onDelete: (id) => _confirmDelete(context, id),
+                            ),
+                          ),
+                        ],
+                      )
+                    : Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (controller.summary.value != null)
+                            SummaryCard(summary: controller.summary.value!),
+                          if (controller.summary.value != null)
+                            const SizedBox(height: 20),
+                          _RecordsSection(
+                            records: controller.records,
+                            onDelete: (id) => _confirmDelete(context, id),
+                          ),
+                        ],
+                      ),
               ),
-            ),
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
-              sliver: SliverList.separated(
-                itemCount: controller.records.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 8),
-                itemBuilder: (context, index) {
-                  final record = controller.records[index];
-                  return FlightRecordCard(
-                    record: record,
-                    onTap: () {
-                      controller.selectRecord(record);
-                      Get.toNamed(AppRoutes.flightDetail);
-                    },
-                    onDelete: () => _confirmDelete(context, record.id),
-                  );
-                },
-              ),
-            ),
-          ],
+            );
+          },
         );
       }),
       floatingActionButton: FloatingActionButton(
@@ -169,6 +183,41 @@ class LogbookView extends GetView<LogbookController> {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _RecordsSection extends StatelessWidget {
+  const _RecordsSection({
+    required this.records,
+    required this.onDelete,
+  });
+
+  final List<dynamic> records;
+  final ValueChanged<String> onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Flight Records', style: AppTextStyles.headlineSmall),
+        const SizedBox(height: 12),
+        ...records.map(
+          (record) => Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: FlightRecordCard(
+              record: record,
+              onTap: () {
+                final controller = Get.find<LogbookController>();
+                controller.selectRecord(record);
+                Get.toNamed(AppRoutes.flightDetail);
+              },
+              onDelete: () => onDelete(record.id),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

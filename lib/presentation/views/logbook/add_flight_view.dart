@@ -9,6 +9,7 @@ import 'package:sky_crew/presentation/theme/app_text_styles.dart';
 import 'package:sky_crew/presentation/widgets/common/app_button.dart';
 import 'package:sky_crew/presentation/widgets/common/app_text_field.dart';
 import 'package:sky_crew/presentation/widgets/common/custom_appbar.dart';
+import 'package:sky_crew/presentation/widgets/common/responsive_content.dart';
 
 /// Add / Edit flight record form.
 class AddFlightView extends GetView<LogbookController> {
@@ -46,13 +47,19 @@ class AddFlightView extends GetView<LogbookController> {
         title: _isEdit ? 'Edit Flight' : 'Log Flight',
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Form(
-            key: formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final useTwoColumns = constraints.maxWidth >= 920;
+
+            return SingleChildScrollView(
+              child: ResponsiveContent(
+                maxWidth: 1080,
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
+                child: Form(
+                  key: formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                 // Date picker
                 Obx(() => AppTextField(
                       label: 'Date',
@@ -91,73 +98,117 @@ class AddFlightView extends GetView<LogbookController> {
                 ),
                 const SizedBox(height: 14),
 
-                Row(
-                  children: [
-                    Expanded(
-                      child: AppTextField(
+                if (useTwoColumns)
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: AppTextField(
+                          label: 'From (ICAO)',
+                          hint: 'VVTS',
+                          controller: depCtrl,
+                          textInputAction: TextInputAction.next,
+                          validator: (v) => v?.isEmpty == true ? 'Required' : null,
+                          onChanged: (v) =>
+                              controller.formDepartureAirport.value = v,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      const Padding(
+                        padding: EdgeInsets.only(top: 18),
+                        child: Icon(Icons.arrow_forward,
+                            color: AppColors.textHint),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: AppTextField(
+                          label: 'To (ICAO)',
+                          hint: 'VVNB',
+                          controller: arrCtrl,
+                          textInputAction: TextInputAction.next,
+                          validator: (v) => v?.isEmpty == true ? 'Required' : null,
+                          onChanged: (v) =>
+                              controller.formArrivalAirport.value = v,
+                        ),
+                      ),
+                    ],
+                  )
+                else
+                  Column(
+                    children: [
+                      AppTextField(
                         label: 'From (ICAO)',
                         hint: 'VVTS',
                         controller: depCtrl,
                         textInputAction: TextInputAction.next,
-                        validator: (v) => v?.isEmpty == true
-                            ? 'Required'
-                            : null,
-                        onChanged: (v) =>
-                            controller.formDepartureAirport.value = v,
+                        validator: (v) => v?.isEmpty == true ? 'Required' : null,
+                        onChanged: (v) => controller.formDepartureAirport.value = v,
                       ),
-                    ),
-                    const SizedBox(width: 12),
-                    const Icon(Icons.arrow_forward,
-                        color: AppColors.textHint),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: AppTextField(
+                      const SizedBox(height: 12),
+                      AppTextField(
                         label: 'To (ICAO)',
                         hint: 'VVNB',
                         controller: arrCtrl,
                         textInputAction: TextInputAction.next,
-                        validator: (v) => v?.isEmpty == true
-                            ? 'Required'
-                            : null,
-                        onChanged: (v) =>
-                            controller.formArrivalAirport.value = v,
+                        validator: (v) => v?.isEmpty == true ? 'Required' : null,
+                        onChanged: (v) => controller.formArrivalAirport.value = v,
                       ),
-                    ),
-                  ],
-                ),
+                    ],
+                  ),
                 const SizedBox(height: 14),
 
-                Row(
-                  children: [
-                    Expanded(
-                      child: AppTextField(
+                if (useTwoColumns)
+                  Row(
+                    children: [
+                      Expanded(
+                        child: AppTextField(
+                          label: 'Aircraft Type',
+                          hint: 'e.g. A320',
+                          controller: typeCtrl,
+                          textInputAction: TextInputAction.next,
+                          validator: (v) => v?.isEmpty == true ? 'Required' : null,
+                          onChanged: (v) =>
+                              controller.formAircraftType.value = v,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: AppTextField(
+                          label: 'Registration',
+                          hint: 'e.g. VN-A123',
+                          controller: regCtrl,
+                          textInputAction: TextInputAction.next,
+                          validator: (v) => v?.isEmpty == true ? 'Required' : null,
+                          onChanged: (v) =>
+                              controller.formAircraftRegistration.value = v,
+                        ),
+                      ),
+                    ],
+                  )
+                else
+                  Column(
+                    children: [
+                      AppTextField(
                         label: 'Aircraft Type',
                         hint: 'e.g. A320',
                         controller: typeCtrl,
                         textInputAction: TextInputAction.next,
-                        validator: (v) => v?.isEmpty == true
-                            ? 'Required'
-                            : null,
+                        validator: (v) => v?.isEmpty == true ? 'Required' : null,
                         onChanged: (v) =>
                             controller.formAircraftType.value = v,
                       ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: AppTextField(
+                      const SizedBox(height: 12),
+                      AppTextField(
                         label: 'Registration',
                         hint: 'e.g. VN-A123',
                         controller: regCtrl,
                         textInputAction: TextInputAction.next,
-                        validator: (v) => v?.isEmpty == true
-                            ? 'Required'
-                            : null,
+                        validator: (v) => v?.isEmpty == true ? 'Required' : null,
                         onChanged: (v) =>
                             controller.formAircraftRegistration.value = v,
                       ),
-                    ),
-                  ],
-                ),
+                    ],
+                  ),
                 const SizedBox(height: 14),
 
                 // Block time
@@ -215,7 +266,7 @@ class AddFlightView extends GetView<LogbookController> {
                 Text('Role', style: AppTextStyles.titleMedium),
                 const SizedBox(height: 8),
                 Obx(() => DropdownButtonFormField<String>(
-                      value: controller.formRole.value.isNotEmpty
+                    initialValue: controller.formRole.value.isNotEmpty
                           ? controller.formRole.value
                           : null,
                       hint: const Text('Select role'),
@@ -287,9 +338,12 @@ class AddFlightView extends GetView<LogbookController> {
                       },
                     )),
                 const SizedBox(height: 32),
-              ],
-            ),
-          ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
         ),
       ),
     );

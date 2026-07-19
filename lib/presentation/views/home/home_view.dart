@@ -19,6 +19,9 @@ import 'package:sky_crew/presentation/views/profile/profile_view.dart';
 class HomeView extends StatelessWidget {
   const HomeView({super.key});
 
+  static const double _wideLayoutBreakpoint = 960;
+  static const double _contentMaxWidth = 1360;
+
   @override
   Widget build(BuildContext context) {
     final nav = Get.find<NavigationController>();
@@ -31,50 +34,141 @@ class HomeView extends StatelessWidget {
         const FatigueTrackingView(),
         const ProfileView(),
       ];
+      final destinations = const [
+        _ShellDestination(
+          icon: Icons.home_outlined,
+          selectedIcon: Icons.home,
+          label: 'Home',
+        ),
+        _ShellDestination(
+          icon: Icons.menu_book_outlined,
+          selectedIcon: Icons.menu_book,
+          label: 'Logbook',
+        ),
+        _ShellDestination(
+          icon: Icons.card_membership_outlined,
+          selectedIcon: Icons.card_membership,
+          label: 'Licenses',
+        ),
+        _ShellDestination(
+          icon: Icons.monitor_heart_outlined,
+          selectedIcon: Icons.monitor_heart,
+          label: 'Wellness',
+        ),
+        _ShellDestination(
+          icon: Icons.person_outline,
+          selectedIcon: Icons.person,
+          label: 'Profile',
+        ),
+      ];
 
-      return Scaffold(
-        body: IndexedStack(
-          index: nav.selectedIndex.value,
-          children: pages,
-        ),
-        bottomNavigationBar: BottomNavigationBar(
-          currentIndex: nav.selectedIndex.value,
-          onTap: nav.setIndex,
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home_outlined),
-              activeIcon: Icon(Icons.home),
-              label: 'Home',
+      final content = IndexedStack(
+        index: nav.selectedIndex.value,
+        children: pages,
+      );
+
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          final useWideLayout = constraints.maxWidth >= _wideLayoutBreakpoint;
+          if (!useWideLayout) {
+            return Scaffold(
+              body: content,
+              bottomNavigationBar: BottomNavigationBar(
+                currentIndex: nav.selectedIndex.value,
+                onTap: nav.setIndex,
+                items: destinations
+                    .map(
+                      (destination) => BottomNavigationBarItem(
+                        icon: Icon(destination.icon),
+                        activeIcon: Icon(destination.selectedIcon),
+                        label: destination.label,
+                      ),
+                    )
+                    .toList(),
+              ),
+            );
+          }
+
+          return Scaffold(
+            body: SafeArea(
+              child: Row(
+                children: [
+                  NavigationRail(
+                    selectedIndex: nav.selectedIndex.value,
+                    onDestinationSelected: nav.setIndex,
+                    labelType: NavigationRailLabelType.all,
+                    minWidth: 88,
+                    minExtendedWidth: 220,
+                    leading: Padding(
+                      padding: const EdgeInsets.fromLTRB(12, 20, 12, 24),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            height: 40,
+                            width: 40,
+                            decoration: BoxDecoration(
+                              color: AppColors.primary,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Icon(
+                              Icons.flight,
+                              color: Colors.white,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Text('SkyCrew', style: AppTextStyles.titleLarge),
+                        ],
+                      ),
+                    ),
+                    destinations: destinations
+                        .map(
+                          (destination) => NavigationRailDestination(
+                            icon: Icon(destination.icon),
+                            selectedIcon: Icon(destination.selectedIcon),
+                            label: Text(destination.label),
+                          ),
+                        )
+                        .toList(),
+                  ),
+                  const VerticalDivider(width: 1),
+                  Expanded(
+                    child: Align(
+                      alignment: Alignment.topCenter,
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(
+                          maxWidth: _contentMaxWidth,
+                        ),
+                        child: content,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.menu_book_outlined),
-              activeIcon: Icon(Icons.menu_book),
-              label: 'Logbook',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.card_membership_outlined),
-              activeIcon: Icon(Icons.card_membership),
-              label: 'Licenses',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.monitor_heart_outlined),
-              activeIcon: Icon(Icons.monitor_heart),
-              label: 'Wellness',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person_outline),
-              activeIcon: Icon(Icons.person),
-              label: 'Profile',
-            ),
-          ],
-        ),
+          );
+        },
       );
     });
   }
 }
 
+class _ShellDestination {
+  const _ShellDestination({
+    required this.icon,
+    required this.selectedIcon,
+    required this.label,
+  });
+
+  final IconData icon;
+  final IconData selectedIcon;
+  final String label;
+}
+
 class _DashboardTab extends StatelessWidget {
   const _DashboardTab();
+
+  static const double _quickActionBreakpoint = 720;
 
   @override
   Widget build(BuildContext context) {
@@ -113,98 +207,106 @@ class _DashboardTab extends StatelessWidget {
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Role badge
-            Obx(() {
-              final user = auth.currentUser.value;
-              if (user == null) return const SizedBox.shrink();
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withAlpha(30),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      user.role.displayName,
-                      style: AppTextStyles.labelMedium
-                          .copyWith(color: AppColors.primary),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                ],
-              );
-            }),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final wideCards = constraints.maxWidth >= _quickActionBreakpoint;
+            final cardWidth = wideCards
+                ? (constraints.maxWidth - 12) / 2
+                : constraints.maxWidth;
 
-            // Logbook summary
-            Obx(() {
-              final s = logbook.summary.value;
-              if (s == null) return const SizedBox.shrink();
-              return Column(
-                children: [
-                  SummaryCard(summary: s),
-                  const SizedBox(height: 16),
-                ],
-              );
-            }),
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Role badge
+                Obx(() {
+                  final user = auth.currentUser.value;
+                  if (user == null) return const SizedBox.shrink();
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withAlpha(30),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          user.role.displayName,
+                          style: AppTextStyles.labelMedium
+                              .copyWith(color: AppColors.primary),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                    ],
+                  );
+                }),
 
-            Text('Quick Actions', style: AppTextStyles.headlineSmall),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: _QuickActionCard(
-                    icon: Icons.add_circle_outline,
-                    label: 'Log Flight',
-                    color: AppColors.primary,
-                    onTap: () {
-                      logbook.clearSelectedRecord();
-                      Get.toNamed(AppRoutes.addFlight);
-                    },
-                  ),
+                // Logbook summary
+                Obx(() {
+                  final s = logbook.summary.value;
+                  if (s == null) return const SizedBox.shrink();
+                  return Column(
+                    children: [
+                      SummaryCard(summary: s),
+                      const SizedBox(height: 16),
+                    ],
+                  );
+                }),
+
+                Text('Quick Actions', style: AppTextStyles.headlineSmall),
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 12,
+                  runSpacing: 12,
+                  children: [
+                    SizedBox(
+                      width: cardWidth,
+                      child: _QuickActionCard(
+                        icon: Icons.add_circle_outline,
+                        label: 'Log Flight',
+                        color: AppColors.primary,
+                        onTap: () {
+                          logbook.clearSelectedRecord();
+                          Get.toNamed(AppRoutes.addFlight);
+                        },
+                      ),
+                    ),
+                    SizedBox(
+                      width: cardWidth,
+                      child: _QuickActionCard(
+                        icon: Icons.monitor_heart_outlined,
+                        label: 'Log Wellness',
+                        color: AppColors.tertiary,
+                        onTap: () => Get.toNamed(AppRoutes.fatigueTracking),
+                      ),
+                    ),
+                    SizedBox(
+                      width: cardWidth,
+                      child: _QuickActionCard(
+                        icon: Icons.menu_book_outlined,
+                        label: 'Logbook',
+                        color: AppColors.textSecondary,
+                        onTap: () => Get.toNamed(AppRoutes.logbook),
+                      ),
+                    ),
+                    SizedBox(
+                      width: cardWidth,
+                      child: _QuickActionCard(
+                        icon: Icons.card_membership_outlined,
+                        label: 'Licenses',
+                        color: AppColors.warning,
+                        onTap: () => Get.toNamed(AppRoutes.licenses),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _QuickActionCard(
-                    icon: Icons.monitor_heart_outlined,
-                    label: 'Log Wellness',
-                    color: AppColors.tertiary,
-                    onTap: () => Get.toNamed(AppRoutes.fatigueTracking),
-                  ),
-                ),
+                const SizedBox(height: 20),
+                _LicenseAlerts(),
+                const SizedBox(height: 32),
               ],
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: _QuickActionCard(
-                    icon: Icons.menu_book_outlined,
-                    label: 'Logbook',
-                    color: AppColors.textSecondary,
-                    onTap: () => Get.toNamed(AppRoutes.logbook),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _QuickActionCard(
-                    icon: Icons.card_membership_outlined,
-                    label: 'Licenses',
-                    color: AppColors.warning,
-                    onTap: () => Get.toNamed(AppRoutes.licenses),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            _LicenseAlerts(),
-            const SizedBox(height: 32),
-          ],
+            );
+          },
         ),
       ),
     );

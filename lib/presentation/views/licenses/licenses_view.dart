@@ -10,6 +10,7 @@ import 'package:sky_crew/presentation/widgets/common/app_button.dart';
 import 'package:sky_crew/presentation/widgets/common/app_card.dart';
 import 'package:sky_crew/presentation/widgets/common/app_text_field.dart';
 import 'package:sky_crew/presentation/widgets/common/custom_appbar.dart';
+import 'package:sky_crew/presentation/widgets/common/responsive_content.dart';
 
 /// Licenses & currency tracking screen.
 class LicensesView extends GetView<LicenseController> {
@@ -47,15 +48,48 @@ class LicensesView extends GetView<LicenseController> {
           );
         }
 
-        return ListView.separated(
-          padding: const EdgeInsets.all(16),
-          itemCount: controller.licenses.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 8),
-          itemBuilder: (context, index) {
-            final license = controller.licenses[index];
-            return _LicenseCard(
-              license: license,
-              onDelete: () => _confirmDelete(context, license.id),
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            final useGrid = constraints.maxWidth >= 900;
+
+            return SingleChildScrollView(
+              child: ResponsiveContent(
+                maxWidth: 1200,
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
+                child: useGrid
+                    ? Wrap(
+                        spacing: 12,
+                        runSpacing: 12,
+                        children: controller.licenses.map((license) {
+                          final cardWidth = (constraints.maxWidth > 1200
+                                  ? 1200
+                                  : constraints.maxWidth) /
+                              2 - 22;
+                          return SizedBox(
+                            width: cardWidth,
+                            child: _LicenseCard(
+                              license: license,
+                              onDelete: () =>
+                                  _confirmDelete(context, license.id),
+                            ),
+                          );
+                        }).toList(),
+                      )
+                    : Column(
+                        children: controller.licenses
+                            .map(
+                              (license) => Padding(
+                                padding: const EdgeInsets.only(bottom: 8),
+                                child: _LicenseCard(
+                                  license: license,
+                                  onDelete: () =>
+                                      _confirmDelete(context, license.id),
+                                ),
+                              ),
+                            )
+                            .toList(),
+                      ),
+              ),
             );
           },
         );
@@ -101,19 +135,24 @@ class LicensesView extends GetView<LicenseController> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      builder: (_) => Padding(
-        padding: EdgeInsets.only(
-          left: 16,
-          right: 16,
-          top: 24,
-          bottom: MediaQuery.of(context).viewInsets.bottom + 24,
-        ),
-        child: Form(
-          key: formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+      builder: (_) => SafeArea(
+        child: Align(
+          alignment: Alignment.bottomCenter,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 640),
+            child: Padding(
+              padding: EdgeInsets.only(
+                left: 16,
+                right: 16,
+                top: 24,
+                bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+              ),
+              child: Form(
+                key: formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
               Text('Add License', style: AppTextStyles.headlineMedium),
               const SizedBox(height: 16),
               AppTextField(
@@ -146,55 +185,70 @@ class LicensesView extends GetView<LicenseController> {
                     controller.formIssuingAuthority.value = v,
               ),
               const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: Obx(() => AppTextField(
-                          label: 'Issue Date',
-                          readOnly: true,
-                          initialValue: controller.formIssueDate.value,
-                          prefixIcon: const Icon(
-                              Icons.calendar_today_outlined,
-                              size: 16),
-                          onTap: () async {
-                            final picked = await showDatePicker(
-                              context: context,
-                              initialDate: DateTime.now(),
-                              firstDate: DateTime(2000),
-                              lastDate: DateTime.now(),
-                            );
-                            if (picked != null) {
-                              controller.formIssueDate.value =
-                                  picked.toIso8601String().substring(0, 10);
-                            }
-                          },
-                        )),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Obx(() => AppTextField(
-                          label: 'Expiry Date',
-                          readOnly: true,
-                          initialValue: controller.formExpiryDate.value,
-                          prefixIcon: const Icon(
-                              Icons.calendar_today_outlined,
-                              size: 16),
-                          onTap: () async {
-                            final picked = await showDatePicker(
-                              context: context,
-                              initialDate: DateTime.now()
-                                  .add(const Duration(days: 365)),
-                              firstDate: DateTime.now(),
-                              lastDate: DateTime(2100),
-                            );
-                            if (picked != null) {
-                              controller.formExpiryDate.value =
-                                  picked.toIso8601String().substring(0, 10);
-                            }
-                          },
-                        )),
-                  ),
-                ],
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final useWideDates = constraints.maxWidth >= 520;
+                  final issueField = Obx(() => AppTextField(
+                        label: 'Issue Date',
+                        readOnly: true,
+                        initialValue: controller.formIssueDate.value,
+                        prefixIcon: const Icon(
+                            Icons.calendar_today_outlined,
+                            size: 16),
+                        onTap: () async {
+                          final picked = await showDatePicker(
+                            context: context,
+                            initialDate: DateTime.now(),
+                            firstDate: DateTime(2000),
+                            lastDate: DateTime.now(),
+                          );
+                          if (picked != null) {
+                            controller.formIssueDate.value =
+                                picked.toIso8601String().substring(0, 10);
+                          }
+                        },
+                      ));
+                  final expiryField = Obx(() => AppTextField(
+                        label: 'Expiry Date',
+                        readOnly: true,
+                        initialValue: controller.formExpiryDate.value,
+                        prefixIcon: const Icon(
+                            Icons.calendar_today_outlined,
+                            size: 16),
+                        onTap: () async {
+                          final picked = await showDatePicker(
+                            context: context,
+                            initialDate:
+                                DateTime.now().add(const Duration(days: 365)),
+                            firstDate: DateTime.now(),
+                            lastDate: DateTime(2100),
+                          );
+                          if (picked != null) {
+                            controller.formExpiryDate.value =
+                                picked.toIso8601String().substring(0, 10);
+                          }
+                        },
+                      ));
+
+                  if (useWideDates) {
+                    return Row(
+                      children: [
+                        Expanded(child: issueField),
+                        const SizedBox(width: 12),
+                        Expanded(child: expiryField),
+                      ],
+                    );
+                  }
+
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      issueField,
+                      const SizedBox(height: 12),
+                      expiryField,
+                    ],
+                  );
+                },
               ),
               const SizedBox(height: 20),
               Obx(() => AppFullWidthButton(
@@ -213,7 +267,10 @@ class LicensesView extends GetView<LicenseController> {
                       }
                     },
                   )),
-            ],
+                  ],
+                ),
+              ),
+            ),
           ),
         ),
       ),

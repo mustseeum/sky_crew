@@ -9,6 +9,7 @@ import 'package:sky_crew/presentation/theme/app_text_styles.dart';
 import 'package:sky_crew/presentation/widgets/common/app_button.dart';
 import 'package:sky_crew/presentation/widgets/common/app_card.dart';
 import 'package:sky_crew/presentation/widgets/common/custom_appbar.dart';
+import 'package:sky_crew/presentation/widgets/common/responsive_content.dart';
 
 /// Fatigue & wellness tracking screen.
 class FatigueTrackingView extends GetView<FatigueController> {
@@ -19,107 +20,48 @@ class FatigueTrackingView extends GetView<FatigueController> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: const CustomAppBar(title: 'Wellness & Fatigue'),
-      body: CustomScrollView(
-        slivers: [
-          SliverPadding(
-            padding: const EdgeInsets.all(16),
-            sliver: SliverList(
-              delegate: SliverChildListDelegate([
-                // Quick stats row
-                Obx(() => Row(
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final useWideLayout = constraints.maxWidth >= 1080;
+
+          return SingleChildScrollView(
+            child: ResponsiveContent(
+              maxWidth: 1280,
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
+              child: useWideLayout
+                  ? Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _StatTile(
-                          label: 'Avg Fatigue',
-                          value: controller.averageFatigue
-                              .toStringAsFixed(1),
-                          icon: Icons.psychology_outlined,
-                          color: _fatigueColor(
-                              controller.averageFatigue.round()),
+                        Expanded(
+                          flex: 4,
+                          child: _WellnessOverview(
+                            controller: controller,
+                            fatigueColor: _fatigueColor,
+                            onAddEntry: () => _showAddSheet(context),
+                          ),
                         ),
-                        const SizedBox(width: 10),
-                        _StatTile(
-                          label: 'Avg Sleep',
-                          value:
-                              '${controller.averageSleep.toStringAsFixed(1)}h',
-                          icon: Icons.bedtime_outlined,
-                          color: controller.averageSleep < 6
-                              ? AppColors.warning
-                              : AppColors.success,
-                        ),
-                        const SizedBox(width: 10),
-                        _StatTile(
-                          label: 'High Fatigue',
-                          value: controller.highFatigueCount.toString(),
-                          icon: Icons.warning_amber_outlined,
-                          color: AppColors.error,
+                        const SizedBox(width: 20),
+                        Expanded(
+                          flex: 5,
+                          child: _HistorySection(controller: controller),
                         ),
                       ],
-                    )),
-                const SizedBox(height: 16),
-
-                // Chart
-                Obx(() {
-                  if (controller.entries.length < 2) {
-                    return const SizedBox.shrink();
-                  }
-                  return AppSectionCard(
-                    title: 'Fatigue Trend (Last 14 days)',
-                    child: SizedBox(
-                      height: 160,
-                      child: _FatigueChart(
-                        entries: controller.entries.take(14).toList(),
-                      ),
+                    )
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _WellnessOverview(
+                          controller: controller,
+                          fatigueColor: _fatigueColor,
+                          onAddEntry: () => _showAddSheet(context),
+                        ),
+                        const SizedBox(height: 16),
+                        _HistorySection(controller: controller),
+                      ],
                     ),
-                  );
-                }),
-                const SizedBox(height: 16),
-
-                // Add entry button
-                AppFullWidthButton(
-                  label: 'Log Today\'s Wellness',
-                  icon: Icons.add,
-                  onPressed: () => _showAddSheet(context),
-                ),
-                const SizedBox(height: 16),
-
-                Text('History', style: AppTextStyles.headlineSmall),
-                const SizedBox(height: 10),
-              ]),
             ),
-          ),
-          Obx(() {
-            if (controller.entries.isEmpty) {
-              return SliverToBoxAdapter(
-                child: Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(32),
-                    child: Text(
-                      'No entries yet. Log your first wellness check-in.',
-                      textAlign: TextAlign.center,
-                      style: AppTextStyles.bodyMedium
-                          .copyWith(color: AppColors.textHint),
-                    ),
-                  ),
-                ),
-              );
-            }
-            return SliverPadding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
-              sliver: SliverList.separated(
-                itemCount: controller.entries.length,
-                separatorBuilder: (_, __) =>
-                    const SizedBox(height: 8),
-                itemBuilder: (context, index) {
-                  final entry = controller.entries[index];
-                  return _EntryCard(
-                    entry: entry,
-                    onDelete: () => controller.deleteEntry(entry.id),
-                  );
-                },
-              ),
-            );
-          }),
-        ],
+          );
+        },
       ),
     );
   }
@@ -134,17 +76,22 @@ class FatigueTrackingView extends GetView<FatigueController> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      builder: (_) => Padding(
-        padding: EdgeInsets.only(
-          left: 16,
-          right: 16,
-          top: 24,
-          bottom: MediaQuery.of(context).viewInsets.bottom + 24,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+      builder: (_) => SafeArea(
+        child: Align(
+          alignment: Alignment.bottomCenter,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 640),
+            child: Padding(
+              padding: EdgeInsets.only(
+                left: 16,
+                right: 16,
+                top: 24,
+                bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
             Text('Log Wellness', style: AppTextStyles.headlineMedium),
             const SizedBox(height: 16),
 
@@ -190,9 +137,126 @@ class FatigueTrackingView extends GetView<FatigueController> {
                     if (success) Get.back();
                   },
                 )),
-          ],
+                ],
+              ),
+            ),
+          ),
         ),
       ),
+    );
+  }
+}
+
+class _WellnessOverview extends StatelessWidget {
+  const _WellnessOverview({
+    required this.controller,
+    required this.fatigueColor,
+    required this.onAddEntry,
+  });
+
+  final FatigueController controller;
+  final Color Function(int score) fatigueColor;
+  final VoidCallback onAddEntry;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Obx(
+          () => Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: [
+              _StatTile(
+                label: 'Avg Fatigue',
+                value: controller.averageFatigue.toStringAsFixed(1),
+                icon: Icons.psychology_outlined,
+                color: fatigueColor(controller.averageFatigue.round()),
+              ),
+              _StatTile(
+                label: 'Avg Sleep',
+                value: '${controller.averageSleep.toStringAsFixed(1)}h',
+                icon: Icons.bedtime_outlined,
+                color: controller.averageSleep < 6
+                    ? AppColors.warning
+                    : AppColors.success,
+              ),
+              _StatTile(
+                label: 'High Fatigue',
+                value: controller.highFatigueCount.toString(),
+                icon: Icons.warning_amber_outlined,
+                color: AppColors.error,
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+        Obx(() {
+          if (controller.entries.length < 2) {
+            return const SizedBox.shrink();
+          }
+          return AppSectionCard(
+            title: 'Fatigue Trend (Last 14 days)',
+            child: SizedBox(
+              height: 160,
+              child: _FatigueChart(
+                entries: controller.entries.take(14).toList(),
+              ),
+            ),
+          );
+        }),
+        const SizedBox(height: 16),
+        AppFullWidthButton(
+          label: 'Log Today\'s Wellness',
+          icon: Icons.add,
+          onPressed: onAddEntry,
+        ),
+      ],
+    );
+  }
+}
+
+class _HistorySection extends StatelessWidget {
+  const _HistorySection({required this.controller});
+
+  final FatigueController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('History', style: AppTextStyles.headlineSmall),
+        const SizedBox(height: 10),
+        Obx(() {
+          if (controller.entries.isEmpty) {
+            return Padding(
+              padding: const EdgeInsets.all(32),
+              child: Text(
+                'No entries yet. Log your first wellness check-in.',
+                textAlign: TextAlign.center,
+                style:
+                    AppTextStyles.bodyMedium.copyWith(color: AppColors.textHint),
+              ),
+            );
+          }
+
+          return Column(
+            children: controller.entries
+                .map(
+                  (entry) => Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: _EntryCard(
+                      entry: entry,
+                      onDelete: () => controller.deleteEntry(entry.id),
+                    ),
+                  ),
+                )
+                .toList(),
+          );
+        }),
+      ],
     );
   }
 }
@@ -212,7 +276,8 @@ class _StatTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
+    return SizedBox(
+      width: 160,
       child: AppCard(
         padding: const EdgeInsets.all(12),
         child: Column(
