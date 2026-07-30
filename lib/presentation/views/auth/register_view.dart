@@ -26,10 +26,8 @@ class RegisterView extends GetView<AuthController> {
     final obscureConfirm = true.obs;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text('Create Account'),
-        backgroundColor: AppColors.background,
       ),
       body: SafeArea(
         child: LayoutBuilder(
@@ -174,7 +172,7 @@ class RegisterView extends GetView<AuthController> {
                                 labelStyle: TextStyle(
                                   color: selected
                                       ? Colors.white
-                                      : AppColors.textPrimary,
+                                      : Theme.of(context).colorScheme.onSurface,
                                 ),
                               );
                             }).toList(),

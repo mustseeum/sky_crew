@@ -71,3 +71,24 @@ abstract class AppColors {
   static const darkTextPrimary = Color(0xFFE8EDE5);
   static const darkTextSecondary = Color(0xFF8FA897);
 }
+
+/// BuildContext extension that returns theme-aware semantic colors.
+/// Use these instead of `AppColors.*` constants in widgets so that dark mode
+/// is automatically applied.
+extension AppColorsContext on BuildContext {
+  ColorScheme get _cs => Theme.of(this).colorScheme;
+
+  Color get colorPrimary => _cs.primary;
+  Color get colorSurface => _cs.surface;
+  Color get colorBackground => Theme.of(this).scaffoldBackgroundColor;
+  Color get colorOutline => _cs.outline;
+  Color get colorError => _cs.error;
+  Color get colorOnSurface => _cs.onSurface;
+
+  /// Equivalent of AppColors.textSecondary — adapts to light/dark.
+  Color get colorTextSecondary => _cs.onSurfaceVariant;
+
+  /// Equivalent of AppColors.textHint — adapts to light/dark.
+  Color get colorTextHint =>
+      _cs.onSurfaceVariant.withAlpha(153); // ~60% opacity
+}

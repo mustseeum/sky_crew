@@ -18,7 +18,6 @@ class FatigueTrackingView extends GetView<FatigueController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
       appBar: const CustomAppBar(title: 'Wellness & Fatigue'),
       body: LayoutBuilder(
         builder: (context, constraints) {

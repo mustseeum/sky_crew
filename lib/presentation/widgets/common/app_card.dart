@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../theme/app_colors.dart';
-
 /// Consistent card container for SkyCrew.
 class AppCard extends StatelessWidget {
   const AppCard({
@@ -23,13 +21,15 @@ class AppCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     final card = Card(
       margin: margin ?? EdgeInsets.zero,
-      color: backgroundColor ?? AppColors.surface,
+      // null → inherits from CardTheme, which is set per-theme in app_theme.dart
+      color: backgroundColor ?? cs.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(
-          color: borderColor ?? AppColors.outline,
+          color: borderColor ?? cs.outline,
           width: 1,
         ),
       ),

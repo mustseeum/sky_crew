@@ -34,7 +34,10 @@ class AuthController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    _tryAutoLogin();
+    // Only run auto-login if we have not already authenticated in this session.
+    if (currentUser.value == null) {
+      _tryAutoLogin();
+    }
   }
 
   Future<void> _tryAutoLogin() async {
@@ -42,7 +45,13 @@ class AuthController extends GetxController {
       final user = await _repository.loadCurrentUser();
       if (user != null) {
         currentUser.value = user;
-        Get.offAllNamed(AppRoutes.home);
+        // Only navigate to home if we are currently on the login/register screen.
+        final route = Get.currentRoute;
+        if (route == AppRoutes.login ||
+            route == AppRoutes.register ||
+            route == '/') {
+          Get.offAllNamed(AppRoutes.home);
+        }
       }
     } catch (_) {
       // No saved session, stay on login

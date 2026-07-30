@@ -96,6 +96,7 @@ class FatigueController extends GetxController {
 
       await _repository.addFatigueEntry(entry);
       entries.insert(0, entry);
+      entries.refresh();
       _clearForm();
       return true;
     } on AppException catch (e) {
@@ -110,6 +111,7 @@ class FatigueController extends GetxController {
     try {
       await _repository.deleteFatigueEntry(id);
       entries.removeWhere((e) => e.id == id);
+      entries.refresh();
       return true;
     } on AppException catch (e) {
       errorMessage.value = e.message;

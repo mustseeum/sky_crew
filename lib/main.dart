@@ -7,7 +7,9 @@ import 'app/bindings/initial_binding.dart';
 import 'app/routes/app_pages.dart';
 import 'config/app_config.dart';
 import 'data/datasources/local/database/app_database.dart';
+import 'presentation/controllers/settings_controller.dart';
 import 'presentation/theme/app_theme.dart';
+import 'utils/constants/app_translations.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,17 +30,26 @@ class SkyCrewApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetMaterialApp(
-      title: 'SkyCrew',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.light,
-      darkTheme: AppTheme.dark,
-      themeMode: ThemeMode.system,
-      initialBinding: InitialBinding(),
-      initialRoute: AppPages.initial,
-      getPages: AppPages.routes,
-      defaultTransition: Transition.fadeIn,
-      transitionDuration: const Duration(milliseconds: 250),
+    return GetBuilder<SettingsController>(
+      init: SettingsController(),
+      builder: (settings) {
+        return GetMaterialApp(
+          title: 'SkyCrew',
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.light,
+          darkTheme: AppTheme.dark,
+          themeMode: settings.themeMode.value,
+          // i18n
+          translations: AppTranslations(),
+          locale: settings.locale.value,
+          fallbackLocale: const Locale('en', 'US'),
+          initialBinding: InitialBinding(),
+          initialRoute: AppPages.initial,
+          getPages: AppPages.routes,
+          defaultTransition: Transition.fadeIn,
+          transitionDuration: const Duration(milliseconds: 250),
+        );
+      },
     );
   }
 }

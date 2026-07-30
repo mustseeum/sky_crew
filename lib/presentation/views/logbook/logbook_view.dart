@@ -18,9 +18,8 @@ class LogbookView extends GetView<LogbookController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
       appBar: CustomAppBar(
-        title: 'Logbook',
+        title: 'logbook_title'.tr,
         actions: [
           IconButton(
             icon: const Icon(Icons.file_download_outlined),
@@ -42,14 +41,17 @@ class LogbookView extends GetView<LogbookController> {
                 const Icon(Icons.flight_outlined,
                     size: 64, color: AppColors.textHint),
                 const SizedBox(height: 12),
-                Text('No flight records yet',
+                Text('logbook_empty'.tr,
                     style: AppTextStyles.headlineSmall.copyWith(
-                        color: AppColors.textSecondary)),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant)),
                 const SizedBox(height: 8),
                 Text(
-                  'Tap + to log your first flight',
-                  style: AppTextStyles.bodyMedium
-                      .copyWith(color: AppColors.textHint),
+                  'logbook_empty_hint'.tr,
+                  style: AppTextStyles.bodyMedium.copyWith(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurfaceVariant
+                          .withAlpha(153)),
                 ),
               ],
             ),

@@ -34,31 +34,31 @@ class HomeView extends StatelessWidget {
         const FatigueTrackingView(),
         const ProfileView(),
       ];
-      final destinations = const [
+      final destinations = [
         _ShellDestination(
           icon: Icons.home_outlined,
           selectedIcon: Icons.home,
-          label: 'Home',
+          label: 'nav_home'.tr,
         ),
         _ShellDestination(
           icon: Icons.menu_book_outlined,
           selectedIcon: Icons.menu_book,
-          label: 'Logbook',
+          label: 'nav_logbook'.tr,
         ),
         _ShellDestination(
           icon: Icons.card_membership_outlined,
           selectedIcon: Icons.card_membership,
-          label: 'Licenses',
+          label: 'nav_licenses'.tr,
         ),
         _ShellDestination(
           icon: Icons.monitor_heart_outlined,
           selectedIcon: Icons.monitor_heart,
-          label: 'Wellness',
+          label: 'nav_wellness'.tr,
         ),
         _ShellDestination(
           icon: Icons.person_outline,
           selectedIcon: Icons.person,
-          label: 'Profile',
+          label: 'nav_profile'.tr,
         ),
       ];
 
@@ -176,9 +176,7 @@ class _DashboardTab extends StatelessWidget {
     final logbook = Get.find<LogbookController>();
 
     return Scaffold(
-      backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.background,
         elevation: 0,
         title: Obx(() {
           final user = auth.currentUser.value;
@@ -189,7 +187,7 @@ class _DashboardTab extends StatelessWidget {
               Text(
                 'Good ${_greeting()},',
                 style: AppTextStyles.bodySmall
-                    .copyWith(color: AppColors.textSecondary),
+                    .copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
               ),
               Text(
                 user?.name ?? 'Crew Member',
@@ -286,7 +284,7 @@ class _DashboardTab extends StatelessWidget {
                       child: _QuickActionCard(
                         icon: Icons.menu_book_outlined,
                         label: 'Logbook',
-                        color: AppColors.textSecondary,
+                        color: AppColors.primary,
                         onTap: () => Get.toNamed(AppRoutes.logbook),
                       ),
                     ),

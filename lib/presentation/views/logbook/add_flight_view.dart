@@ -42,7 +42,6 @@ class AddFlightView extends GetView<LogbookController> {
     }
 
     return Scaffold(
-      backgroundColor: AppColors.background,
       appBar: CustomAppBar(
         title: _isEdit ? 'Edit Flight' : 'Log Flight',
       ),

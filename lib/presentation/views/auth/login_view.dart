@@ -20,7 +20,6 @@ class LoginView extends GetView<AuthController> {
     final obscure = true.obs;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -62,7 +61,7 @@ class LoginView extends GetView<AuthController> {
                         Text(
                           'Professional Flight Crew Management',
                           style: AppTextStyles.bodyMedium.copyWith(
-                            color: AppColors.textSecondary,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                         ),
                         const SizedBox(height: 48),
@@ -71,7 +70,7 @@ class LoginView extends GetView<AuthController> {
                         Text(
                           'Sign in to your account',
                           style: AppTextStyles.bodyMedium.copyWith(
-                            color: AppColors.textSecondary,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                         ),
                         const SizedBox(height: 32),

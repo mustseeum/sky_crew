@@ -125,15 +125,16 @@ class _RouteBadge extends StatelessWidget {
       children: [
         Text(from,
             style: AppTextStyles.headlineSmall.copyWith(
-              color: AppColors.primary,
+              color: Theme.of(context).colorScheme.primary,
             )),
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 6),
-          child: Icon(Icons.arrow_forward, size: 14, color: AppColors.textHint),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 6),
+          child: Icon(Icons.arrow_forward, size: 14,
+              color: Theme.of(context).colorScheme.onSurfaceVariant),
         ),
         Text(to,
             style: AppTextStyles.headlineSmall.copyWith(
-              color: AppColors.textPrimary,
+              color: Theme.of(context).colorScheme.onSurface,
             )),
       ],
     );
@@ -151,7 +152,7 @@ class _InfoChip extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 12, color: AppColors.textSecondary),
+        Icon(icon, size: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
         const SizedBox(width: 3),
         Text(label, style: AppTextStyles.bodySmall),
       ],

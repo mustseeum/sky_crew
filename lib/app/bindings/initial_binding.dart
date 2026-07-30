@@ -9,6 +9,7 @@ import '../../data/repositories/license_repository.dart';
 import '../../data/repositories/logbook_repository.dart';
 import '../../presentation/controllers/auth_controller.dart';
 import '../../presentation/controllers/navigation_controller.dart';
+import '../../presentation/controllers/settings_controller.dart';
 
 /// Registers global dependencies that persist for the app's lifetime.
 class InitialBinding extends Bindings {
@@ -40,11 +41,16 @@ class InitialBinding extends Bindings {
       fenix: true,
     );
 
-    // Auth controller is permanent so it survives navigation
-    Get.lazyPut<AuthController>(
-      () => AuthController(repository: Get.find<AuthRepository>()),
-      fenix: true,
+    // Auth controller is permanent – registered once for the app lifetime.
+    Get.put<AuthController>(
+      AuthController(repository: Get.find<AuthRepository>()),
+      permanent: true,
     );
+
+    // Settings controller is permanent (drives theme + locale for the app).
+    if (!Get.isRegistered<SettingsController>()) {
+      Get.put<SettingsController>(SettingsController(), permanent: true);
+    }
 
     // Navigation controller
     Get.put(NavigationController(), permanent: true);

@@ -92,6 +92,7 @@ class LogbookController extends GetxController {
 
       await _repository.addFlightRecord(record);
       records.insert(0, record);
+      records.refresh();
       _updateSummary();
       _clearForm();
       return true;
@@ -134,6 +135,7 @@ class LogbookController extends GetxController {
 
       await _repository.updateFlightRecord(updated);
       records[index] = updated;
+      records.refresh();
       _updateSummary();
       _clearForm();
       return true;
@@ -151,6 +153,7 @@ class LogbookController extends GetxController {
     try {
       await _repository.deleteFlightRecord(id);
       records.removeWhere((r) => r.id == id);
+      records.refresh();
       _updateSummary();
       return true;
     } on AppException catch (e) {

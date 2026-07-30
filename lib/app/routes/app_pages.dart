@@ -46,6 +46,7 @@ class AppPages {
       page: () => const LogbookView(),
       binding: LogbookBinding(),
       transition: Transition.rightToLeft,
+      preventDuplicates: false,
     ),
     GetPage(
       name: AppRoutes.addFlight,
@@ -64,17 +65,20 @@ class AppPages {
       page: () => const LicensesView(),
       binding: LicenseBinding(),
       transition: Transition.rightToLeft,
+      preventDuplicates: false,
     ),
     GetPage(
       name: AppRoutes.fatigueTracking,
       page: () => const FatigueTrackingView(),
       binding: FatigueBinding(),
       transition: Transition.rightToLeft,
+      preventDuplicates: false,
     ),
     GetPage(
       name: AppRoutes.profile,
       page: () => const ProfileView(),
       transition: Transition.rightToLeft,
+      preventDuplicates: false,
     ),
   ];
 }

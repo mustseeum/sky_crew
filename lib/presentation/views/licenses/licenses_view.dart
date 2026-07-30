@@ -19,7 +19,6 @@ class LicensesView extends GetView<LicenseController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
       appBar: const CustomAppBar(title: 'Licenses & Currency'),
       body: Obx(() {
         if (controller.isLoading.value) {
@@ -34,14 +33,17 @@ class LicensesView extends GetView<LicenseController> {
                 const Icon(Icons.card_membership_outlined,
                     size: 64, color: AppColors.textHint),
                 const SizedBox(height: 12),
-                Text('No licenses added',
+                Text('licenses_empty'.tr,
                     style: AppTextStyles.headlineSmall
-                        .copyWith(color: AppColors.textSecondary)),
+                        .copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
                 const SizedBox(height: 8),
                 Text(
-                  'Tap + to add your first license',
-                  style: AppTextStyles.bodyMedium
-                      .copyWith(color: AppColors.textHint),
+                  'licenses_empty_hint'.tr,
+                  style: AppTextStyles.bodyMedium.copyWith(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurfaceVariant
+                          .withAlpha(153)),
                 ),
               ],
             ),

@@ -81,8 +81,9 @@ class LicenseController extends GetxController {
       );
 
       await _repository.addLicense(license);
-      licenses.add(license);
-      licenses.sort((a, b) => a.expiryDate.compareTo(b.expiryDate));
+      final updated = [...licenses, license]
+        ..sort((a, b) => a.expiryDate.compareTo(b.expiryDate));
+      licenses.assignAll(updated);
       _clearForm();
       return true;
     } on AppException catch (e) {
@@ -99,6 +100,7 @@ class LicenseController extends GetxController {
     try {
       await _repository.deleteLicense(id);
       licenses.removeWhere((l) => l.id == id);
+      licenses.refresh();
       return true;
     } on AppException catch (e) {
       errorMessage.value = e.message;

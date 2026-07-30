@@ -25,7 +25,6 @@ class FlightDetailView extends GetView<LogbookController> {
       }
 
       return Scaffold(
-        backgroundColor: AppColors.background,
         appBar: CustomAppBar(
           title: record.flightNumber,
           subtitle: DateTimeHelper.formatDate(record.date),
